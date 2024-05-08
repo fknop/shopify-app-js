@@ -11,10 +11,13 @@ export {
   DeliveryMethod,
   BillingInterval,
   ApiVersion,
+  JwtPayload,
+  Session,
 } from '@shopify/shopify-api';
 
+export type {ContextTypes} from './types-contexts';
 export type {ShopifyApp, LoginError} from './types';
 export {LoginErrorType, AppDistribution} from './types';
 export {boundary} from './boundary';
-export {shopifyApp} from './shopify-app';
+export {shopifyApp, appConfig} from './shopify-app';
 export * from './errors';
