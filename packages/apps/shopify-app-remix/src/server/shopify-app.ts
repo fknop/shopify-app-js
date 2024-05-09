@@ -117,15 +117,6 @@ export function shopifyApp<
   return shopify as ShopifyApp<Config>;
 }
 
-export function appConfig<
-  Config extends AppConfigArg<Resources, Storage, Future>,
-  Resources extends ShopifyRestResources,
-  Storage extends SessionStorage,
-  Future extends FutureFlagOptions = Config['future'],
->(appConfig: Config): Config {
-  return appConfig;
-}
-
 function isAppStoreApp<Config extends AppConfigArg>(
   _shopify: ShopifyAppBase<Config>,
   config: Config,

@@ -1,20 +1,22 @@
 // This file contains types we want to export to make it easier for apps to pass the contexts we return as types
 
-import {
-  BillingInterval,
-  DeliveryMethod,
-  JwtPayload,
-  type Session,
-} from '@shopify/shopify-api';
+import {BillingInterval, DeliveryMethod} from '@shopify/shopify-api';
 import {restResources} from '@shopify/shopify-api/rest/admin/2023-04';
 import {MemorySessionStorage} from '@shopify/shopify-app-session-storage-memory';
 
-import {appConfig, shopifyApp} from './shopify-app';
-import {ContextTypes} from './types-contexts';
+import {shopifyApp} from './shopify-app';
+import {AdminContext, UnauthenticatedAdminContext} from './types-contexts';
 
 const MONTHLY_PLAN = 'monthly';
 
-const config = appConfig({
+const future = {
+  v3_webhookAdminContext: true,
+  v3_authenticatePublic: true,
+  v3_lineItemBilling: true,
+  unstable_newEmbeddedAuthStrategy: true,
+} as const;
+
+const shopify = shopifyApp({
   appUrl: 'https://example.com',
   apiKey: '',
   apiSecretKey: '',
@@ -43,77 +45,59 @@ const config = appConfig({
       ],
     },
   },
-  future: {
-    v3_webhookAdminContext: true,
-    v3_authenticatePublic: true,
-    v3_lineItemBilling: true,
-    unstable_newEmbeddedAuthStrategy: true,
-  },
+  future,
 });
-const shopify = shopifyApp(config);
 
-type Context = ContextTypes<typeof config>;
+// async function doStuff(
+//   storefront: Context['storefrontApi'],
+//   billing: Context['billing'],
+//   cors: Context['cors'],
+//   redirect: Context['redirect'],
+//   sessionToken: JwtPayload,
+//   fsPayload: Context['fulfillmentServicePayload'],
+//   liquid: Context['liquid'],
+//   topic: Context['webhookTopic'],
+// ) {
+//   const response = {} as any;
 
-async function doStuff(
-  session: Session,
-  admin: Context['adminApi'],
-  storefront: Context['storefrontApi'],
-  billing: Context['billing'],
-  cors: Context['cors'],
-  redirect: Context['redirect'],
-  sessionToken: JwtPayload,
-  fsPayload: Context['fulfillmentServicePayload'],
-  liquid: Context['liquid'],
-  topic: Context['webhookTopic'],
-) {
-  const response = {} as any;
+//   (await storefront.graphql('')).text();
 
-  (await admin.rest.resources.Product.all({session})).data[0].save();
+//   await billing.request({plan: MONTHLY_PLAN, amount: 1});
 
-  (await storefront.graphql('')).text();
+//   cors(response).text();
 
-  await billing.request({plan: MONTHLY_PLAN, amount: 1});
+//   redirect(response).text();
 
-  cors(response).text();
+//   console.log(sessionToken);
 
-  redirect(response).text();
+//   console.log(fsPayload.kind, fsPayload.derp);
 
-  console.log(sessionToken);
+//   liquid('', {headers: {'Content-Type': 'text/html'}}).text();
 
-  console.log(fsPayload.kind, fsPayload.derp);
-
-  liquid('', {headers: {'Content-Type': 'text/html'}}).text();
-
-  switch (topic) {
-    case 'APP_UNINSTALLED':
-      break;
-  }
-}
+//   switch (topic) {
+//     case 'APP_UNINSTALLED':
+//       break;
+//   }
+// }
 
 async function loader() {
   const request = {} as any;
-  const {admin, session} = await shopify.unauthenticated.admin('');
-  const {storefront} = await shopify.unauthenticated.storefront('');
-  const {billing, cors, redirect, sessionToken} =
-    await shopify.authenticate.admin(request);
-  const {payload: fsPayload} =
-    await shopify.authenticate.fulfillmentService(request);
-  const {admin: admin2, topic} = await shopify.authenticate.webhook(request);
-  const {liquid} = await shopify.authenticate.public.appProxy(request);
-  await shopify.authenticate.public.checkout(request);
+  // const {storefront} = await shopify.unauthenticated.storefront('');
+  // const {payload: fsPayload} =
+  //   await shopify.authenticate.fulfillmentService(request);
+  // const {admin: admin2, topic} = await shopify.authenticate.webhook(request);
+  // const {liquid} = await shopify.authenticate.public.appProxy(request);
+  // await shopify.authenticate.public.checkout(request);
 
-  await doStuff(
-    session,
-    admin2 || admin,
-    storefront,
-    billing,
-    cors,
-    redirect,
-    sessionToken,
-    fsPayload,
-    liquid,
-    topic,
-  );
+  const {admin: uAdmin, session: uSession} =
+    await shopify.unauthenticated.admin('');
+  const uAdminContext: UnauthenticatedAdminContext<typeof shopify>['admin'] =
+    uAdmin;
+  uAdminContext.rest.resources.Product.all({session: uSession});
+
+  const {admin, session} = await shopify.authenticate.admin(request);
+  const adminContext: AdminContext<typeof shopify>['admin'] = admin;
+  adminContext.rest.resources.Product.all({session});
 }
 
 loader();
