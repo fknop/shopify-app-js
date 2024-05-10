@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.8
+
+### Patch Changes
+
+- faf7ad5: Use type imports in generated codegen files.
+
 ## 0.0.7
 
 ### Patch Changes

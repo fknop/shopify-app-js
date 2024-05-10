@@ -1,5 +1,11 @@
 # @shopify/shopify-app-session-storage-drizzle
 
+## 1.1.3
+
+### Patch Changes
+
+- ec6bdfc: Bump mysql2 from 3.9.2 to 3.9.7
+
 ## 1.1.2
 
 ### Patch Changes

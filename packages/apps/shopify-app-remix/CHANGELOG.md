@@ -1,5 +1,20 @@
 # @shopify/shopify-app-remix
 
+## 2.9.0
+
+### Minor Changes
+
+- a810211: Add API to Authenticate requests from customer account extensions
+
+### Patch Changes
+
+- 5c72853: Added debugging for request information when we fail to find a session during app proxy authentication.
+- e305364: Invalidating accessToken instead of deleting the record when handling 401 errors
+- Updated dependencies [92b6772]
+- Updated dependencies [9749f45]
+  - @shopify/shopify-api@10.0.1
+  - @shopify/shopify-app-session-storage@2.1.6
+
 ## 2.8.2
 
 ### Patch Changes

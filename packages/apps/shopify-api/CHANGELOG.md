@@ -1,5 +1,41 @@
 # Changelog
 
+## 10.0.1
+
+### Patch Changes
+
+- 92b6772: Added an `is_default` field to `CustomerAddress` so it doesn't overlap with the existing `default()` method we provide in the class.
+
+  Before:
+
+  ```ts
+  const address = await shopify.rest.CustomerAddress.find({
+    session,
+    id: 1234,
+  });
+  // Boolean
+  console.log(address.default);
+  // Error - not a function
+  await address.default();
+  ```
+
+  After:
+
+  ```ts
+  const address = await shopify.rest.CustomerAddress.find({
+    session,
+    id: 1234,
+  });
+  // Boolean
+  console.log(address.is_default);
+  // Function
+  await address.default();
+  ```
+
+  To prevent breaking existing apps, this only happens when the `customerAddressDefaultFix` flag is enabled.
+
+- 9749f45: Handle empty responses to REST requests for DELETE endpoints gracefully, instead of throwing an error when parsing the JSON.
+
 ## 10.0.0
 
 ### Major Changes
@@ -20,17 +56,17 @@
   Before:
 
   ```ts
-  import 'node_modules/@shopify/shopify-api/lib/clients/admin/graphql/client';
-  import '@shopify/shopify-api/adapters/node';
+  import "node_modules/@shopify/shopify-api/lib/clients/admin/graphql/client";
+  import "@shopify/shopify-api/adapters/node";
   ```
 
   After:
 
   ```ts
   // Add `dist/esm|cjs/` before the file
-  import 'node_modules/@shopify/shopify-api/dist/esm/lib/clients/admin/graphql/client';
+  import "node_modules/@shopify/shopify-api/dist/esm/lib/clients/admin/graphql/client";
   // Unchanged
-  import '@shopify/shopify-api/adapters/node';
+  import "@shopify/shopify-api/adapters/node";
   ```
 
 ### Patch Changes
@@ -142,7 +178,7 @@
   <details>
 
   ```ts
-  const {session, headers} = shopify.auth.callback({
+  const { session, headers } = shopify.auth.callback({
     rawRequest: req,
     rawResponse: res,
   });
@@ -346,13 +382,13 @@
   Before:
 
   ```ts
-  import {gdprTopics} from '@shopify/shopify-api';
+  import { gdprTopics } from "@shopify/shopify-api";
   ```
 
   After:
 
   ```ts
-  import {privacyTopics} from '@shopify/shopify-api';
+  import { privacyTopics } from "@shopify/shopify-api";
   ```
 
 ### Minor Changes
@@ -405,13 +441,13 @@
           {
             interval: BillingInterval.Usage,
             amount: 30,
-            currencyCode: 'USD',
-            terms: 'per 1000 emails',
+            currencyCode: "USD",
+            terms: "per 1000 emails",
           },
           {
             interval: BillingInterval.Every30Days,
             amount: 30,
-            currencyCode: 'USD',
+            currencyCode: "USD",
             discount: {
               durationLimitInIntervals: 3,
               value: {
@@ -783,7 +819,7 @@
   Before:
 
   ```js
-  app.post('/graphql', async (req, res) => {
+  app.post("/graphql", async (req, res) => {
     await Shopify.Utils.graphqlProxy(req, res);
   });
   ```
@@ -791,7 +827,7 @@
   After:
 
   ```js
-  app.post('/graphql', async (req, res) => {
+  app.post("/graphql", async (req, res) => {
     const response = await Shopify.Utils.graphqlProxy(req, res);
     res.status(200).send(response.body);
   });

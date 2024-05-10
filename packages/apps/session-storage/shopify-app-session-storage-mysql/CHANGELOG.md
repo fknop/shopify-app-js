@@ -1,5 +1,11 @@
 # @shopify/shopify-app-session-storage-mysql
 
+## 3.0.6
+
+### Patch Changes
+
+- ec6bdfc: Bump mysql2 from 3.9.2 to 3.9.7
+
 ## 3.0.5
 
 ### Patch Changes
