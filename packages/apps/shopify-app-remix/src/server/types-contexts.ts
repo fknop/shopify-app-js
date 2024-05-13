@@ -1,30 +1,22 @@
 // This file contains types we want to export to make it easier for apps to pass the contexts we return as types
 
-import type {ShopifyRestResources} from '@shopify/shopify-api';
-import type {SessionStorage} from '@shopify/shopify-app-session-storage';
-
 import type {AppConfigArg} from './config-types';
-import type {ShopifyApp} from './types';
-import type {FutureFlagOptions} from './future/flags';
+import type {MandatoryTopics, ShopifyApp} from './types';
 import type {AdminContext as IAdminContext} from './authenticate/admin/types';
 import type {UnauthenticatedAdminContext as IUnauthenticatedAdminContext} from './unauthenticated/admin/types';
+import type {UnauthenticatedStorefrontContext as IUnauthenticatedStorefrontContext} from './unauthenticated/storefront/types';
+import type {WebhookContext as IWebhookContext} from './authenticate/webhooks/types';
+import type {FlowContext as IFlowContext} from './authenticate/flow/types';
+import type {FulfillmentServiceContext as IFulfillmentServiceContext} from './authenticate/fulfillment-service/types';
+import type {
+  AppProxyContext as IAppProxyContext,
+  AppProxyContextWithSession as IAppProxyContextWithSession,
+} from './authenticate/public/appProxy/types';
+import type {CheckoutContext as ICheckoutContext} from './authenticate/public/checkout/types';
+import type {CustomerAccountContext as ICustomerAccountContext} from './authenticate/public/customer-account/types';
 
 type ShopifyConfig<App> =
-  App extends ShopifyApp<
-    infer Config extends AppConfigArg<
-      Config['restResources'] extends ShopifyRestResources
-        ? Config['restResources']
-        : ShopifyRestResources,
-      Config['sessionStorage'] extends SessionStorage
-        ? Config['sessionStorage']
-        : SessionStorage,
-      Config['future'] extends FutureFlagOptions
-        ? Config['future']
-        : FutureFlagOptions
-    >
-  >
-    ? Config
-    : never;
+  App extends ShopifyApp<infer Config extends AppConfigArg> ? Config : never;
 
 type ConfigComponents<Config> =
   Config extends AppConfigArg<infer Resources, infer Storage, infer Future>
@@ -41,4 +33,28 @@ export type UnauthenticatedAdminContext<App = DefaultApp> =
 export type AdminContext<App = DefaultApp> = IAdminContext<
   ShopifyConfig<App>,
   ConfigComponents<ShopifyConfig<App>>['resources']
+>;
+
+export type UnauthenticatedStorefrontContext<_App = DefaultApp> =
+  IUnauthenticatedStorefrontContext;
+
+export type FlowContext<App = DefaultApp> = IFlowContext<
+  ConfigComponents<ShopifyConfig<App>>['resources']
+>;
+
+export type FulfillmentServiceContext<App = DefaultApp> =
+  IFulfillmentServiceContext<ConfigComponents<ShopifyConfig<App>>['resources']>;
+
+export type AppProxyContext<_App = DefaultApp> =
+  | IAppProxyContext
+  | IAppProxyContextWithSession;
+
+export type CheckoutContext<_App = DefaultApp> = ICheckoutContext;
+
+export type CustomerAccountContext<_App = DefaultApp> = ICustomerAccountContext;
+
+export type WebhookContext<App = DefaultApp> = IWebhookContext<
+  ConfigComponents<ShopifyConfig<App>>['future'],
+  ConfigComponents<ShopifyConfig<App>>['resources'],
+  keyof ShopifyConfig<App>['webhooks'] | MandatoryTopics
 >;
