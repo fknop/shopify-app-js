@@ -14,6 +14,10 @@ import type {
 } from './authenticate/public/appProxy/types';
 import type {CheckoutContext as ICheckoutContext} from './authenticate/public/checkout/types';
 import type {CustomerAccountContext as ICustomerAccountContext} from './authenticate/public/customer-account/types';
+import type {
+  AdminApiContext as IAdminApiContext,
+  StorefrontContext as IStorefrontContext,
+} from './clients';
 
 type ShopifyConfig<App> =
   App extends ShopifyApp<infer Config extends AppConfigArg> ? Config : never;
@@ -58,3 +62,19 @@ export type WebhookContext<App = DefaultApp> = IWebhookContext<
   ConfigComponents<ShopifyConfig<App>>['resources'],
   keyof ShopifyConfig<App>['webhooks'] | MandatoryTopics
 >;
+
+// Extra types for the Admin API context
+export type AdminApiContext<App = DefaultApp> = IAdminApiContext<
+  ConfigComponents<ShopifyConfig<App>>['resources']
+>;
+
+export type AdminRestClient<App = DefaultApp> = AdminApiContext<App>['rest'];
+
+export type AdminGraphqlClient<App = DefaultApp> =
+  AdminApiContext<App>['graphql'];
+
+// Extra types for the Storefront API context
+export type StorefrontApiContext<_App = DefaultApp> = IStorefrontContext;
+
+export type StorefrontGraphqlClient<App = DefaultApp> =
+  StorefrontApiContext<App>['graphql'];

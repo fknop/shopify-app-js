@@ -6,12 +6,16 @@ import {MemorySessionStorage} from '@shopify/shopify-app-session-storage-memory'
 
 import {shopifyApp} from './shopify-app';
 import {
+  AdminApiContext,
   AdminContext,
+  AdminGraphqlClient,
   AppProxyContext,
   CheckoutContext,
   CustomerAccountContext,
   FlowContext,
   FulfillmentServiceContext,
+  StorefrontApiContext,
+  StorefrontGraphqlClient,
   UnauthenticatedAdminContext,
   UnauthenticatedStorefrontContext,
   WebhookContext,
@@ -56,15 +60,42 @@ const shopify = shopifyApp({
   },
 });
 
+async function doQuery(graphql: AdminGraphqlClient<typeof shopify>) {
+  const response = await graphql('');
+  console.log(response.text());
+}
+
+async function useClient(admin: AdminApiContext<typeof shopify>) {
+  const response = await admin.rest.resources.Product.all({
+    session: {} as any,
+  });
+  console.log(response.data[0].handle);
+
+  await doQuery(admin.graphql);
+}
+
+async function doSfQuery(graphql: StorefrontGraphqlClient<typeof shopify>) {
+  const response = await graphql('');
+  console.log(response.text());
+}
+
+async function useSfClient(storefront: StorefrontApiContext<typeof shopify>) {
+  const response = await storefront.graphql('');
+  console.log(response.text());
+
+  await doSfQuery(storefront.graphql);
+}
+
 async function loader() {
   const request = {} as any;
   const response = {} as any;
 
   const uAdmin = await shopify.unauthenticated.admin('');
   const uAdminContext: UnauthenticatedAdminContext<typeof shopify> = uAdmin;
-  uAdminContext.admin.rest.resources.Product.all({
+  const resp = await uAdminContext.admin.rest.resources.Product.all({
     session: uAdminContext.session,
   });
+  console.log(resp.data[0].handle);
 
   const admin = await shopify.authenticate.admin(request);
   const adminContext: AdminContext<typeof shopify> = admin;
@@ -76,6 +107,8 @@ async function loader() {
   adminContext.cors(response).text();
   adminContext.redirect(response).text();
   console.log(adminContext.sessionToken);
+
+  await useClient(adminContext.admin);
 
   const uSf = await shopify.unauthenticated.storefront('');
   const uSfContext: UnauthenticatedStorefrontContext<typeof shopify> = uSf;
@@ -102,6 +135,8 @@ async function loader() {
   });
   (await appProxyContext.storefront?.graphql(''))?.text();
   appProxyContext.liquid(response).text();
+
+  await useSfClient(appProxyContext.storefront!);
 
   const checkout = await shopify.authenticate.public.checkout(request);
   const checkoutContext: CheckoutContext<typeof shopify> = checkout;
